@@ -31,7 +31,24 @@ jobs:
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
 
       - name: Validate the bundled sequence
-        run: php -r 'exit(json_decode(file_get_contents("workflow-discovery-cycling/sequences/cycling-desk.json"), true) === null ? 1 : 0);'
+        # Block scalar, because an unquoted ': ' anywhere in a run: value is a YAML
+        # mapping and the whole workflow file stops parsing.
+        run: |
+          php -r '
+            $config = json_decode(file_get_contents("workflow-discovery-cycling/sequences/cycling-desk.json"), true);
+            if (!is_array($config) || empty($config["config"]["statuses"])) {
+              fwrite(STDERR, "cycling-desk.json is not a readable sequence\n");
+              exit(1);
+            }
+            $ideation = array_filter($config["config"]["metadata_fields"], fn($f) => !empty($f["show_in_ideation"]));
+            printf("%d stages, %d metadata fields, %d asked at ideation\n",
+              count($config["config"]["statuses"]),
+              count($config["config"]["metadata_fields"]),
+              count($ideation));
+            // The show_in_ideation split is the point of this extension. A sequence
+            // that flags nothing would install fine and demo nothing.
+            exit(count($ideation) > 0 ? 0 : 1);
+          '
 
       - name: Test the prompt mapper
         run: php workflow-discovery-cycling/tests/test-prompt-mapper.php
