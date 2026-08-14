@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  php:
+    name: Lint and test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # 8.2 is VIP's floor; 8.3 catches the deprecations that arrive next.
+        php: [ '8.2', '8.3' ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Lint every PHP file
+        run: |
+          # xargs, not find -exec: find exits 0 even when the command it ran failed,
+          # so -exec php -l would report a syntax error as a green build. xargs
+          # propagates the failure.
+          find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Validate the bundled sequence
+        run: php -r 'exit(json_decode(file_get_contents("workflow-discovery-cycling/sequences/cycling-desk.json"), true) === null ? 1 : 0);'
+
+      - name: Test the prompt mapper
+        run: php workflow-discovery-cycling/tests/test-prompt-mapper.php

@@ -1,0 +1,122 @@
+{
+  "name": "Cycling Desk",
+  "slug": "cycling-desk",
+  "type": "workflow",
+  "description": "Write, edit, publish for the cycling desk. Commissioning decisions — what kind of item this is, which race it belongs to, whether it is embargoed — are asked for during ideation, not after the post exists.",
+  "config": {
+    "version": "2.0",
+    "post_types": [ "post" ],
+    "registers_cpt": false,
+    "reviewer_roles": [ "editor", "administrator" ],
+    "statuses": [
+      {
+        "key": "draft",
+        "label": "Writing",
+        "description": "The reporter is writing it",
+        "color": "#3498db",
+        "icon": "edit",
+        "status": "draft",
+        "region_entry": true,
+        "transitions": [
+          { "to": "editing", "label": "Send to Desk" }
+        ]
+      },
+      {
+        "key": "editing",
+        "label": "Editing",
+        "description": "The desk is subbing it",
+        "color": "#f39c12",
+        "icon": "visibility",
+        "status": "draft",
+        "transitions": [
+          { "to": "publish", "label": "Publish" },
+          { "to": "draft", "label": "Back to Reporter" }
+        ]
+      },
+      {
+        "key": "publish",
+        "label": "Published",
+        "description": "Live",
+        "color": "#27ae60",
+        "icon": "megaphone",
+        "status": "publish",
+        "region_entry": true,
+        "is_terminal": true,
+        "transitions": []
+      }
+    ],
+    "automations": [
+      {
+        "trigger": "status.editing.entered",
+        "action": "notify",
+        "config": {
+          "to": "role:editor",
+          "message": "{{post.title}} is with the desk"
+        }
+      }
+    ],
+    "settings": {
+      "allow_skip": false,
+      "ideation_draft_action": "cycling-commission"
+    },
+    "metadata_fields": [
+      {
+        "key": "story_type",
+        "label": "Story Type",
+        "type": "select",
+        "options": [
+          "Race report",
+          "Rider news",
+          "Analysis",
+          "Tech",
+          "Interview",
+          "Live blog"
+        ],
+        "required": true,
+        "searchable": true,
+        "show_in_ideation": true
+      },
+      {
+        "key": "race",
+        "label": "Race",
+        "type": "text",
+        "required": false,
+        "searchable": true,
+        "show_in_ideation": true
+      },
+      {
+        "key": "embargo_state",
+        "label": "Embargo",
+        "type": "select",
+        "options": [ "None", "Embargoed" ],
+        "required": false,
+        "searchable": true,
+        "show_in_ideation": true
+      },
+      {
+        "key": "embargo_until",
+        "label": "Embargo Until",
+        "type": "date",
+        "required": false,
+        "searchable": false,
+        "show_in_ideation": true
+      },
+      {
+        "key": "sub_editor",
+        "label": "Sub-editor",
+        "type": "user",
+        "required": false,
+        "searchable": true,
+        "show_in_ideation": false
+      },
+      {
+        "key": "seo_notes",
+        "label": "SEO Notes",
+        "type": "textarea",
+        "required": false,
+        "searchable": false,
+        "show_in_ideation": false
+      }
+    ]
+  }
+}
