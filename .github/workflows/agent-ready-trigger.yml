@@ -76,8 +76,9 @@ jobs:
                 ]
               }
             }
-          # Uncomment to stream the full SDK output into the job log for debugging:
-          # show_full_output: true
+          # Enabled while testing the template: without this the SDK output is
+          # hidden and a run that produces nothing leaves no trace of why.
+          show_full_output: true
           additional_permissions: |
             actions: read
           prompt: |
@@ -123,8 +124,9 @@ jobs:
                 ]
               }
             }
-          # Uncomment to stream the full SDK output into the job log for debugging:
-          # show_full_output: true
+          # Enabled while testing the template: without this the SDK output is
+          # hidden and a run that produces nothing leaves no trace of why.
+          show_full_output: true
           additional_permissions: |
             actions: read
           prompt: |
