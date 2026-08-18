@@ -36,7 +36,7 @@ jobs:
       github.event.label.name == 'agent-ready' &&
       (vars.AGENT_PROVIDER == 'claude' || vars.AGENT_PROVIDER == '')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: write
       pull-requests: write
@@ -75,7 +75,15 @@ jobs:
                 "defaultMode": "acceptEdits",
                 "allow": [
                   "Bash(git *)",
-                  "Bash(gh *)"
+                  "Bash(gh *)",
+                  "Bash(php *)",
+                  "Bash(which *)",
+                  "Bash(find *)",
+                  "Bash(xargs *)",
+                  "Bash(ls *)",
+                  "Bash(cat *)",
+                  "Bash(mkdir *)",
+                  "Bash(rm *)"
                 ]
               }
             }
@@ -126,7 +134,15 @@ jobs:
                 "defaultMode": "acceptEdits",
                 "allow": [
                   "Bash(git *)",
-                  "Bash(gh *)"
+                  "Bash(gh *)",
+                  "Bash(php *)",
+                  "Bash(which *)",
+                  "Bash(find *)",
+                  "Bash(xargs *)",
+                  "Bash(ls *)",
+                  "Bash(cat *)",
+                  "Bash(mkdir *)",
+                  "Bash(rm *)"
                 ]
               }
             }
