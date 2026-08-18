@@ -13,9 +13,21 @@ This repo exists to demonstrate that, and to be a working example of a real exte
 | `workflow-discovery-cycling/` | The plugin. One self-contained WordPress plugin, no build step. |
 | `workflow-discovery-cycling/sequences/cycling-desk.json` | The Cycling Desk sequence — write → edit → publish, with the metadata fields. |
 | `workflow-discovery-cycling/tests/` | Tests for the mapper, plus a real feed capture as a fixture. |
+| `workflow-assistant-rider-bios/` | A sibling plugin: a research ability that returns short rider bios from Wikipedia for every rider named in a story. |
 | `.github/` | The [agentic workflow template](https://github.com/whyisjake/agentic-workflow-template) — agent-ready issues, routing, planning gate. |
 | `docs/SOURCES.md` | The feeds, what each is good for, and what was tried and rejected. |
 | `docs/DEMO.md` | The walkthrough. |
+
+## Rider Bios (Wikipedia)
+
+`workflow-assistant-rider-bios/` is an add-on alongside the Cycling Desk source, not a change to it. It registers a VIP Workflows **research ability** — a different extension point from the discovery source above — that a desk can run against a draft to get a short bio for every rider it names: nationality, current team, and notable and recent wins, each read from Wikipedia's public API (no key, no rate limit — see `docs/SOURCES.md`).
+
+It works in two stages, the same split as the discovery source's Feed_Reader and Prompt_Mapper:
+
+1. `Rider_Extractor` (no WordPress) reads candidate names out of the story text by shape — two to four capitalised words, allowing a lowercase surname particle like 'van' or 'de' in the middle — and rejects anything that reads like a race, team or section heading instead of a person.
+2. `Wikipedia_Client` looks each candidate up, and `Bio_Mapper` (no WordPress) decides whether the resolved page is confidently about a cyclist at all. A candidate that does not resolve to one specific, confirmed cyclist is dropped rather than returned with guessed-at fields — the same "a wrong hint is worse than no hint" rule the discovery source runs on.
+
+This means the extractor can afford to be a little generous about what looks name-shaped — a bike model or a race name that happens to fit the same capitalisation pattern gets filtered out at the Wikipedia stage, not returned as somebody's bio. A rider referred to by surname alone in a headline ('Vollering', 'Pogačar') is not picked up; that trade is deliberate, in keeping with this repo's low-recall-by-design heuristics.
 
 ## Requirements
 
@@ -81,9 +93,11 @@ No PHPUnit, no WordPress, no build step:
 
 ```sh
 php workflow-discovery-cycling/tests/test-prompt-mapper.php
+php workflow-assistant-rider-bios/tests/test-rider-extractor.php
+php workflow-assistant-rider-bios/tests/test-bio-mapper.php
 ```
 
-CI runs that plus `php -l` over everything on 8.2 and 8.3.
+CI runs all three plus `php -l` over everything on 8.2 and 8.3.
 
 ## Upstream gaps
 

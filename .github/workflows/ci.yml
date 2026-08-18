@@ -52,3 +52,9 @@ jobs:
 
       - name: Test the prompt mapper
         run: php workflow-discovery-cycling/tests/test-prompt-mapper.php
+
+      - name: Test the rider extractor
+        run: php workflow-assistant-rider-bios/tests/test-rider-extractor.php
+
+      - name: Test the bio mapper
+        run: php workflow-assistant-rider-bios/tests/test-bio-mapper.php
