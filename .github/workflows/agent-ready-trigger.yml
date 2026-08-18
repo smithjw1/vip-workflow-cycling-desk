@@ -66,6 +66,9 @@ jobs:
         uses: anthropics/claude-code-action@239e3a730883eeb5c53db12b0fc9573b3024b126 # v1.0.191
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # settings.permissions.defaultMode does not reach the SDK — four runs ran in
+          # "default" mode, where every write waits on a human who is not there.
+          claude_args: --permission-mode acceptEdits
           settings: |
             {
               "permissions": {
@@ -114,6 +117,9 @@ jobs:
         uses: anthropics/claude-code-action@239e3a730883eeb5c53db12b0fc9573b3024b126 # v1.0.191
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # settings.permissions.defaultMode does not reach the SDK — four runs ran in
+          # "default" mode, where every write waits on a human who is not there.
+          claude_args: --permission-mode acceptEdits
           settings: |
             {
               "permissions": {
