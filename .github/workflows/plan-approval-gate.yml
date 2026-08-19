@@ -24,7 +24,7 @@ jobs:
       github.event.issue.pull_request == null &&
       startsWith(github.event.comment.body, '/approve-plan')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: write
       pull-requests: write
@@ -113,13 +113,25 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # settings.permissions.defaultMode does not reach the SDK — see the runs on
+          # issue #1. Without this every write is refused and the job goes green.
+          claude_args: --permission-mode acceptEdits
           settings: |
             {
               "permissions": {
                 "defaultMode": "acceptEdits",
                 "allow": [
                   "Bash(git *)",
-                  "Bash(gh *)"
+                  "Bash(gh *)",
+                  "Bash(php *)",
+                  "Bash(which *)",
+                  "Bash(find *)",
+                  "Bash(xargs *)",
+                  "Bash(ls *)",
+                  "Bash(cat *)",
+                  "Bash(mkdir *)",
+                  "Bash(rm *)",
+                  "Bash(curl *)"
                 ]
               }
             }
