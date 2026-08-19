@@ -1,0 +1,15 @@
+[
+    {
+        "id": "Q50821956",
+        "label": "Remco Evenepoel",
+        "description": "Belgian cyclist"
+    },
+    {
+        "id": "Q120175844",
+        "label": "R.EV Cycling Academy",
+        "description": "cycling academy in Brussels",
+        "aliases": [
+            "Remco Evenepoel Cycling Academy"
+        ]
+    }
+]

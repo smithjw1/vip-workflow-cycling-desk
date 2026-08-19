@@ -12,7 +12,8 @@ This repo exists to demonstrate that, and to be a working example of a real exte
 | --- | --- |
 | `workflow-discovery-cycling/` | The plugin. One self-contained WordPress plugin, no build step. |
 | `workflow-discovery-cycling/sequences/cycling-desk.json` | The Cycling Desk sequence — write → edit → publish, with the metadata fields. |
-| `workflow-discovery-cycling/tests/` | Tests for the mapper, plus a real feed capture as a fixture. |
+| `workflow-discovery-cycling/blocks/rider-card/` | The rider card block — a small, factual panel of a rider's team, nationality, date of birth, discipline and notable results, fetched from Wikidata once at commissioning. |
+| `workflow-discovery-cycling/tests/` | Tests for the mappers, plus real feed and Wikidata captures as fixtures. |
 | `.github/` | The [agentic workflow template](https://github.com/whyisjake/agentic-workflow-template) — agent-ready issues, routing, planning gate. |
 | `docs/SOURCES.md` | The feeds, what each is good for, and what was tried and rejected. |
 | `docs/DEMO.md` | The walkthrough. |
@@ -46,11 +47,19 @@ wp workflow-cycling stream --force --limit=40   # refetch
 wp workflow-cycling flush                        # drop the 15-minute cache
 ```
 
+And the same for a rider lookup, which is the only way to exercise the Wikidata client outside of ideation:
+
+```sh
+wp workflow-cycling rider-lookup "Tadej Pogačar"
+wp workflow-cycling rider-lookup "Pogacar"           # a dropped diacritic — no confident match, by design
+wp workflow-cycling rider-lookup "Tadej Pogačar" --force   # skip the 7-day lookup cache
+```
+
 ## How the three pieces fit
 
 **The source names the sequence.** Every prompt the source returns carries `blueprint_id`, resolved by slug at request time. Resolving by slug and not id matters: ids differ per site, and a hard-coded one would point at whatever sequence happens to hold that id — which is worse than pointing at nothing, because ideation would then ask for another desk's fields.
 
-**The sequence decides what gets asked.** Four of its six metadata fields are flagged `show_in_ideation`:
+**The sequence decides what gets asked.** Five of its seven metadata fields are flagged `show_in_ideation`:
 
 | Field | Asked at ideation | Why |
 | --- | --- | --- |
@@ -58,6 +67,7 @@ wp workflow-cycling flush                        # drop the 15-minute cache
 | Race | yes | Known before the post exists; it is what the desk files under. |
 | Embargo | yes | Whether a story is embargoed governs what happens to it from the first minute, not from the sub's pass. |
 | Embargo Until | yes | Useless separately from the field above — see the action, below. |
+| Riders | yes | Which rider card(s), if any, a story needs is a commissioning decision — the fetch it triggers happens once, at commission, not on every future edit. |
 | Sub-editor | no | Not known at commissioning. Assigned when the desk picks it up. |
 | SEO Notes | no | Written against copy that does not exist yet. |
 
@@ -75,15 +85,26 @@ It does not prefill the metadata fields, for two reasons. Nothing in ideation pr
 
 The heuristics were tuned against a real capture of all three feeds, kept in `workflow-discovery-cycling/tests/fixtures/feed-items.json`. On that capture the race detector fires on 11 of 60 items and is right on all 11. Low recall, deliberately — see `docs/SOURCES.md` for what it rejects and why.
 
+## The rider card
+
+A cycling story is always about one or more riders, and every one of them carries the same five facts — current team, nationality, date of birth, discipline, a notable result or two. Every writer re-typing those from memory is how the wrong number of Grand Tour wins ends up in print. The rider card is the desk's standard answer: a small, factual panel sourced once from Wikidata rather than typed fresh each time.
+
+It is two separable halves. The `riders` field, asked at ideation like the desk's other commissioning decisions, is where an author names who a story needs a card for. Once the draft exists, `Rider_Card_Commissioner` resolves each name against Wikidata exactly once — guarded by its own postmeta so a later save of the same post never re-fetches — and appends a rider card block with the resolved facts written into its attributes. The block itself (`render.php`) then only ever reads those attributes: no fetch, no cache, no outbound request on a page view, by construction rather than by discipline.
+
+Resolution fails closed at every stage, the same philosophy as the mapper above but stricter, because the failure it guards against is worse: a wrong hint in a seed is corrected by a human reading it, but a wrong rider's palmarès in a published card reads as fact. A typed name must match a Wikidata candidate's label or alias exactly — Wikidata's own search is fuzzy and diacritic-insensitive, and this refuses that fuzziness on purpose, so "Pogacar" for "Tadej Pogačar" produces no card rather than a guessed one. More than one exact match (a same-named painter shares the current world champion's exact name on Wikidata) also produces no card. And a single exact match still has to carry a recognised cycling occupation or sport claim, because a common name can resolve to exactly one Wikidata entry and still be someone else entirely.
+
 ## Tests
 
 No PHPUnit, no WordPress, no build step:
 
 ```sh
 php workflow-discovery-cycling/tests/test-prompt-mapper.php
+php workflow-discovery-cycling/tests/test-rider-mapper.php
 ```
 
-CI runs that plus `php -l` over everything on 8.2 and 8.3.
+The rider mapper's fixtures are real Wikidata captures from 19 August 2026 — a current pro rider, a retired one, a rider with no discipline claim on Wikidata, a same-name non-cyclist, and a rider who shares his exact name with an unrelated painter — for the same reason the feed fixture is real: every edge case the mapper guards against should be something Wikidata's data actually does, not a shape invented to make a test pass.
+
+CI runs both plus `php -l` over everything on 8.2 and 8.3.
 
 ## Upstream gaps
 

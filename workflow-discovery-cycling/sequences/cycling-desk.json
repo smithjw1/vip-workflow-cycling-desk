@@ -102,6 +102,14 @@
         "show_in_ideation": true
       },
       {
+        "key": "riders",
+        "label": "Riders",
+        "type": "text",
+        "required": false,
+        "searchable": true,
+        "show_in_ideation": true
+      },
+      {
         "key": "sub_editor",
         "label": "Sub-editor",
         "type": "user",
