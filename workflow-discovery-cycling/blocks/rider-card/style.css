@@ -1,0 +1,28 @@
+.workflow-discovery-cycling-rider-card {
+	max-width: 24em;
+	padding: 1em;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.workflow-discovery-cycling-rider-card__name {
+	margin: 0 0 0.5em;
+	font-weight: 600;
+}
+
+.workflow-discovery-cycling-rider-card__facts {
+	margin: 0;
+}
+
+.workflow-discovery-cycling-rider-card__facts dt {
+	font-weight: 600;
+}
+
+.workflow-discovery-cycling-rider-card__facts dd {
+	margin: 0 0 0.5em;
+}
+
+.workflow-discovery-cycling-rider-card__results {
+	margin: 0.5em 0 0;
+	padding-left: 1.2em;
+}

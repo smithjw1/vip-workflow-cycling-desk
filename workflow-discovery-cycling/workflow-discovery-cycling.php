@@ -23,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/includes/class-feed-reader.php';
 require_once __DIR__ . '/includes/class-prompt-mapper.php';
 require_once __DIR__ . '/includes/class-sequence-installer.php';
+require_once __DIR__ . '/includes/class-wikidata-client.php';
+require_once __DIR__ . '/includes/class-rider-mapper.php';
+require_once __DIR__ . '/includes/class-rider-card-commissioner.php';
+require_once __DIR__ . '/includes/class-rider-card-block.php';
 
 /**
  * Wires the source, the sequence and the commissioning action together.
@@ -49,11 +53,24 @@ class Plugin {
 	}
 
 	/**
+	 * Absolute URL to this plugin, with a trailing slash.
+	 *
+	 * @return string
+	 */
+	public static function url(): string {
+		return plugin_dir_url( __FILE__ );
+	}
+
+	/**
 	 * Hook everything up.
 	 */
 	public static function boot(): void {
 		add_action( 'vip_workflow_register_discovery_providers', array( self::class, 'register_provider' ) );
 		add_filter( 'vip_workflow_ideation_draft_actions', array( self::class, 'register_draft_action' ) );
+
+		add_action( 'init', array( Rider_Card_Block::class, 'register' ) );
+		add_action( 'enqueue_block_editor_assets', array( Rider_Card_Block::class, 'enqueue_editor_assets' ) );
+		add_action( 'save_post', array( Rider_Card_Commissioner::class, 'on_save' ), 10, 2 );
 
 		register_activation_hook( __FILE__, array( self::class, 'on_activation' ) );
 

@@ -22,27 +22,34 @@ Also worth reading: `includes/ideation/class-ideation-sequence.php` for how a se
 
 | Path | What |
 | --- | --- |
-| `workflow-discovery-cycling/workflow-discovery-cycling.php` | Provider registration, the `cycling-commission` draft action, the embargo rule. |
+| `workflow-discovery-cycling/workflow-discovery-cycling.php` | Provider registration, the `cycling-commission` draft action, the embargo rule, the rider card's hooks. |
 | `includes/class-feed-reader.php` | Fetches and normalises the three RSS feeds. All the WordPress in the project is here and in the main file. |
 | `includes/class-prompt-mapper.php` | Feed item → discovery prompt, plus the race and story-type heuristics. **No WordPress**, deliberately — it holds all the guessing, so it must stay testable without a WP install. |
 | `includes/class-sequence-installer.php` | Installs and resolves the sequence. Resolves by **slug**, never by id. |
-| `includes/class-cli.php` | `wp workflow-cycling install-sequence` / `stream` / `flush`. |
+| `includes/class-cli.php` | `wp workflow-cycling install-sequence` / `stream` / `flush` / `rider-lookup`. |
+| `includes/class-wikidata-client.php` | Fetches Wikidata search/entity/SPARQL results over `wp_remote_get()`, keyless, cached 7 days. |
+| `includes/class-rider-mapper.php` | Wikidata JSON → rider card facts, plus the candidate-resolution and is-this-a-cyclist heuristics. **No WordPress**, same reasoning as `Prompt_Mapper`. |
+| `includes/class-rider-card-commissioner.php` | The ideation-side stage: resolves the `riders` field on a fresh Cycling Desk post, once, via `save_post`. |
+| `includes/class-rider-card-block.php` | Registers the `workflow-discovery-cycling/rider-card` block and its editor script. |
+| `blocks/rider-card/` | The block: `block.json`, `render.php` (the one render path, editor and front end), `edit.js` (`ServerSideRender`, no build step), `style.css`. |
 | `sequences/cycling-desk.json` | The sequence. Schema matches `vip-workflow/includes/database/class-seeder.php` — statuses need `status` and `region_entry`, not just `key`/`label`. |
 | `tests/` | Plain-PHP assertions, no PHPUnit. |
 
 ## Constraints
 
 - **No build step, no composer, no npm.** One self-contained plugin directory. This is a deliberate match for how the `vip-workflow-extensions` shelf works.
-- **`Prompt_Mapper` stays free of WordPress functions.** It is the only class with a test, because it is the only class that guesses.
-- **Heuristics get tuned against the fixture, never against invented headlines.** `tests/fixtures/feed-items.json` is a real capture of all three feeds from 14 August 2026. Every false positive the code guards against came out of it; none was a shape anyone would have written by hand. If you widen a heuristic, re-run the test — it asserts the exact set of races found, not a count, so drift shows up.
-- **A wrong hint is worse than no hint.** The mapper returns empty rather than falling back to the most likely value, and the seed frames what it did derive as something to confirm. Precision over recall: on the fixture the race detector fires on 11 of 60 and is right on all 11. Do not "improve" recall without checking precision on the fixture.
-- **Never prefill a metadata field.** There is no hook for it, and it is the wrong shape anyway — see the README's upstream-gaps section. Suggestions go in the seed, visibly suggested.
+- **`Prompt_Mapper` and `Rider_Mapper` stay free of WordPress functions.** They are the only classes with a test, because they are the only classes that guess.
+- **Heuristics get tuned against a fixture, never against invented data.** `tests/fixtures/feed-items.json` is a real capture of all three feeds from 14 August 2026; `tests/fixtures/wikidata-*.json` are real `wbsearchentities`/`wbgetentities`/SPARQL captures from 19 August 2026. Every false positive either mapper guards against came out of one of these; none was a shape anyone would have written by hand. If you widen a heuristic, re-run the tests — they assert exact sets, not counts, so drift shows up.
+- **A wrong hint is worse than no hint.** The prompt mapper returns empty rather than falling back to the most likely value, and the seed frames what it did derive as something to confirm. The rider mapper is stricter still — a fuzzy or ambiguous match produces no card at all, never a nearest-match rider, because a wrong card is the failure it exists to prevent. Precision over recall: on the feed fixture the race detector fires on 11 of 60 and is right on all 11. Do not "improve" recall without checking precision on the fixture.
+- **Never prefill a metadata field.** There is no hook for it, and it is the wrong shape anyway — see the README's upstream-gaps section. Suggestions go in the seed, visibly suggested. The rider card is not an exception to this: its facts are fetched once at commissioning and stored on the block, not prefilled into a field.
 - Feed content belongs to its publishers. The plugin deliberately does not read `<content:encoded>`. See `docs/SOURCES.md`.
+- **The rider card renders only from stored block attributes, never on render.** `blocks/rider-card/render.php` reads `$attributes` and nothing else — no `wp_remote_get()`, no transient lookup. The fetch happens once, in `Rider_Card_Commissioner::on_save()`, guarded by its own postmeta so it cannot run twice for the same post.
 
 ## Testing
 
 ```sh
 php workflow-discovery-cycling/tests/test-prompt-mapper.php
+php workflow-discovery-cycling/tests/test-rider-mapper.php
 find . -name '*.php' -print0 | xargs -0 -n1 php -l
 ```
 

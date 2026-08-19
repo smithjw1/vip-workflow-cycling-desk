@@ -150,4 +150,111 @@ class CLI {
 
 		\WP_CLI::success( 'Cached feed items dropped. The next read refetches.' );
 	}
+
+	/**
+	 * Resolve a rider name against Wikidata, the way commissioning does.
+	 *
+	 * The only way to exercise the Wikidata client and the rider mapper outside of
+	 * ideation — this repo has no WP test runner, so this is the manual verification
+	 * path for the WordPress-layer half of the rider card.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <name>
+	 * : The rider name to resolve, exactly as an author would type it.
+	 *
+	 * [--force]
+	 * : Skip the 7-day lookup cache.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp workflow-cycling rider-lookup "Tadej Pogačar"
+	 *     wp workflow-cycling rider-lookup "Pogacar"
+	 *     wp workflow-cycling rider-lookup "Tadej Pogačar" --force
+	 *
+	 * @subcommand rider-lookup
+	 *
+	 * @param array $args       Positional args.
+	 * @param array $assoc_args Flags.
+	 */
+	public function rider_lookup( array $args, array $assoc_args ): void {
+		$name  = (string) ( $args[0] ?? '' );
+		$force = ! empty( $assoc_args['force'] );
+
+		if ( '' === trim( $name ) ) {
+			\WP_CLI::error( 'Usage: wp workflow-cycling rider-lookup "<name>"' );
+		}
+
+		$search = Wikidata_Client::search( $name, $force );
+
+		if ( is_wp_error( $search ) ) {
+			\WP_CLI::error( 'Wikidata search failed: ' . $search->get_error_message() );
+		}
+
+		$qid = Rider_Mapper::resolve_candidate( $search, $name );
+
+		if ( null === $qid ) {
+			\WP_CLI::log( sprintf( '%d candidate(s) found for "%s".', count( $search ), $name ) );
+			\WP_CLI::warning( 'No confident match — either no candidate\'s label or alias matched exactly, or more than one did.' );
+			return;
+		}
+
+		$entity = Wikidata_Client::entity( $qid, $force );
+
+		if ( is_wp_error( $entity ) ) {
+			\WP_CLI::error( 'Wikidata entity fetch failed: ' . $entity->get_error_message() );
+		}
+
+		if ( ! Rider_Mapper::is_cyclist( $entity ) ) {
+			\WP_CLI::warning( sprintf( 'Resolved to %s, but nothing in their claims says they are a cyclist. No confident match.', $qid ) );
+			return;
+		}
+
+		$referenced = array();
+
+		foreach ( array( 'P54', 'P27', 'P641' ) as $property ) {
+			foreach ( (array) ( $entity[ $property ] ?? array() ) as $claim ) {
+				$referenced_qid = (string) ( $claim['mainsnak']['datavalue']['value']['id'] ?? '' );
+
+				if ( '' !== $referenced_qid ) {
+					$referenced[] = $referenced_qid;
+				}
+			}
+		}
+
+		$labels = $referenced ? Wikidata_Client::labels( $referenced, $force ) : array();
+
+		if ( is_wp_error( $labels ) ) {
+			$labels = array();
+		}
+
+		$victories = Wikidata_Client::victories( $qid, $force );
+
+		if ( is_wp_error( $victories ) ) {
+			$victories = null;
+		}
+
+		$card = Rider_Mapper::map( $name, $search, $entity, $labels, $victories );
+
+		if ( null === $card ) {
+			\WP_CLI::warning( 'Resolved and confirmed as a cyclist, but the card came back empty. No confident match.' );
+			return;
+		}
+
+		\WP_CLI::log( sprintf( 'Resolved: %s (%s)', $card['name'], $card['riderQid'] ) );
+
+		\WP_CLI\Utils\format_items(
+			'table',
+			array(
+				array(
+					'team'            => '' !== $card['team'] ? $card['team'] : '—',
+					'nationality'     => '' !== $card['nationality'] ? $card['nationality'] : '—',
+					'date_of_birth'   => '' !== $card['dateOfBirth'] ? $card['dateOfBirth'] : '—',
+					'discipline'      => '' !== $card['discipline'] ? $card['discipline'] : '—',
+					'notable_results' => $card['notableResults'] ? implode( '; ', $card['notableResults'] ) : '—',
+				),
+			),
+			array( 'team', 'nationality', 'date_of_birth', 'discipline', 'notable_results' )
+		);
+	}
 }

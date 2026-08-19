@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "workflow-discovery-cycling/rider-card",
+  "title": "Rider Card",
+  "category": "widgets",
+  "icon": "id",
+  "description": "A rider's factual details — team, nationality, date of birth, discipline, notable results — fetched from Wikidata once at commissioning.",
+  "textdomain": "workflow-discovery-cycling",
+  "attributes": {
+    "riderQid": { "type": "string", "default": "" },
+    "name": { "type": "string", "default": "" },
+    "team": { "type": "string", "default": "" },
+    "nationality": { "type": "string", "default": "" },
+    "dateOfBirth": { "type": "string", "default": "" },
+    "discipline": { "type": "string", "default": "" },
+    "notableResults": { "type": "array", "default": [] }
+  },
+  "supports": {
+    "html": false
+  },
+  "style": "file:./style.css"
+}
