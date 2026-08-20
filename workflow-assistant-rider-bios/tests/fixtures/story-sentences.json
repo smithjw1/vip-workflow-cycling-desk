@@ -1,0 +1,67 @@
+[
+  {
+    "text": "Volta a Portugal: Neutralised stage 8 concludes in mourning following tragic death of Finlay Tarling",
+    "expected": ["Finlay Tarling"],
+    "note": "the race name before the colon must not merge with the clause after it"
+  },
+  {
+    "text": "Arctic Race of Norway: Erlend Blikra gets a home win on stage 2",
+    "expected": ["Erlend Blikra"],
+    "note": "'Arctic Race' and the country name are not a rider"
+  },
+  {
+    "text": "Fara Gr4 review: Norwegian sensibilities mate with an all-out race machine in perfect harmony",
+    "expected": [],
+    "note": "a model code with a digit is not a name, even once the digit is stripped from the edge"
+  },
+  {
+    "text": "Visma-Lease a Bike confirm Fabio Jakobsen joins team 'with immediate effect' after Picnic-PostNL departure",
+    "expected": ["Fabio Jakobsen"],
+    "note": "team and sponsor names on either side of the real name are rejected"
+  },
+  {
+    "text": "From road to gravel then back to road: Why is Wout van Aert racing the Belgian Gravel Championships for the first time ever this Sunday?",
+    "expected": ["Wout van Aert"],
+    "note": "a lowercase surname particle joins two capitalised parts into one name"
+  },
+  {
+    "text": "'I am not sure what will happen in a race' – Former biathlon champion Emilien Jacquelin set to make his pro cycling debut",
+    "expected": ["Emilien Jacquelin"],
+    "note": "an en dash introducing a new clause does not merge into the name that follows"
+  },
+  {
+    "text": "Vollering's World Championships quest, Courtney's WorldTour debut and big transfer intrigue",
+    "expected": [],
+    "note": "a rider referred to by surname alone is not caught — a known, deliberate limitation — and 'WorldTour' is not a name"
+  },
+  {
+    "text": "Vuelta a Colombia cancelled mid-race to help prioritise earthquake victim relief. Nine-day race ends after five stages, Diego Camargo declared winner",
+    "expected": ["Diego Camargo"],
+    "note": "the race name in the first sentence does not leak into the name in the second"
+  },
+  {
+    "text": "'The worst best decision I've ever made' – Chloé Dygert issues recovery update following double surgery. American, who hasn't raced since crashing out of Paris-Roubaix Femmes",
+    "expected": ["Chloé Dygert"],
+    "note": "an accented name is read correctly, and a hyphenated race name is rejected by either half"
+  },
+  {
+    "text": "Tour de France Femmes stage winners Lorena Wiebes and Kim Le Court-Pienaar headline star-studded start list for Tour of Britain Women",
+    "expected": ["Lorena Wiebes", "Kim Le Court-Pienaar"],
+    "note": "a three-word race name is rejected as too long once 'de' is allowed as a particle, and a three-part hyphenated surname is read as one name"
+  },
+  {
+    "text": "'Incredibly frustrating and disappointing' – Three UAE Team Emirates-XRG riders eliminated from Volta a Portugal",
+    "expected": [],
+    "note": "an all-caps acronym anywhere in the run rules the whole run out, not just the acronym itself"
+  },
+  {
+    "text": "SD Worx-Protime Classics squad",
+    "expected": [],
+    "note": "a two-letter acronym is enough to reject the run"
+  },
+  {
+    "text": "No sequence at all, just plain prose about nothing in particular here.",
+    "expected": [],
+    "note": "ordinary prose with no capitalised run at all"
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "_note": "Synthetic samples shaped like real Wikipedia REST summary + categories responses (see https://en.wikipedia.org/api/rest_v1/page/summary/ and the action API's prop=categories), not a live capture. This environment has no outbound network access to Wikipedia, so — unlike the cycling desk plugin's feed-items.json, which is a real capture — these model the documented response conventions by hand rather than replaying real data. What is being tested is Bio_Mapper's parsing logic against that shape, not any particular rider's actual record.",
+  "confirmed_cyclist": {
+    "title": "Jens Voskuilen",
+    "description": "Belgian professional road racing cyclist",
+    "extract": "Jens Voskuilen is a Belgian professional road racing cyclist. He currently rides for the UCI WorldTeam Dunelight Cycling. He won a stage of the 2026 Vuelta a España.",
+    "categories": [
+      "Belgian cyclists",
+      "Living people",
+      "1998 births",
+      "Tour de France stage winners",
+      "Dunelight Cycling riders"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Jens_Voskuilen"
+  },
+  "cyclist_no_extras": {
+    "title": "Priya Landman",
+    "description": "Canadian cyclist",
+    "extract": "Priya Landman is a Canadian cyclist who competes in track and road events.",
+    "categories": [
+      "Canadian cyclists",
+      "Living people",
+      "2000 births"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Priya_Landman"
+  },
+  "not_a_cyclist": {
+    "title": "Trek Domane",
+    "description": "Endurance road bicycle model",
+    "extract": "The Trek Domane is an endurance road bicycle produced by Trek Bicycle Corporation.",
+    "categories": [
+      "Bicycle models",
+      "Trek Bicycle Corporation"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Trek_Domane"
+  },
+  "cyclist_by_category_only": {
+    "title": "Ola Ferm",
+    "description": "",
+    "extract": "Ola Ferm is a Norwegian racer who has competed since 2019.",
+    "categories": [
+      "Norwegian cyclists",
+      "Living people"
+    ],
+    "url": "https://en.wikipedia.org/wiki/Ola_Ferm"
+  }
+}
